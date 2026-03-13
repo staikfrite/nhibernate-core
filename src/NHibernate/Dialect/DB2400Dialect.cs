@@ -1,7 +1,10 @@
 using System;
+using System.Data;
 using System.Data.Common;
+using System.Text;
 using NHibernate.Dialect.Schema;
 using NHibernate.SqlCommand;
+using NHibernate.SqlTypes;
 
 namespace NHibernate.Dialect
 {
@@ -67,6 +70,24 @@ namespace NHibernate.Dialect
 		public override bool SupportsVariableLimit
 		{
 			get { return false; }
+		}
+
+		public override string ToStringLiteral(string value, SqlType type)
+		{
+			if (value == null)
+				throw new System.ArgumentNullException(nameof(value));
+			if (type == null)
+				throw new System.ArgumentNullException(nameof(value));
+
+			// See https://www.ibm.com/docs/en/db2/11.5?topic=elements-constants#r0000731__title__7
+			var literal = new StringBuilder(value);
+			
+			literal
+				.Replace("'", "''")
+				.Insert(0, '\'')
+				.Append('\'');
+
+			return literal.ToString();
 		}
 	}
 }
